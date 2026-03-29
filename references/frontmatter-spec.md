@@ -7,7 +7,7 @@
 | Field | Required | Values | Description |
 |-------|----------|--------|-------------|
 | `type` | Always | `note`, `literature`, `project`, `moc`, `daily` | Note type |
-| `tags` | Always (except daily) | Hierarchical: `ML/metrics` | Topic tags |
+| `tags` | Always (except daily) | Hierarchical, **English only**: `ML/metrics` | Topic tags |
 | `status` | Always (except moc, daily) | `draft`, `active`, `archive` | Note status |
 | `source` | Required for `literature`, optional for `note` | Free text | Source reference |
 | `created` | Always | `YYYY-MM-DD` | Creation date |

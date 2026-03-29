@@ -32,11 +32,12 @@ If empty — report «_inbox/ пуст, нечего обрабатывать» 
 obsidian read file="filename"
 ```
 
-- Determine the topic and appropriate tags (hierarchical: `ML/metrics`)
+- Determine the topic and appropriate tags (hierarchical, **always in English**: `ML/metrics`, `dev/versioning`, `finance/bonds`)
 - Determine the type: `note` (atomic concept), `literature` (course/book summary), `project` (project-related)
 - If unclear, ask the user
-- Generate filename by core concept: `RMSLE metric.md`, `Обработка пропусков.md`
-  - Russian topic → Russian name, English topic → English name
+- Generate filename by core concept, **in Russian by default**: `Обработка пропусков.md`, `Семантическое версионирование (SemVer).md`
+  - English abbreviations/acronyms stay as-is: `Git`, `ML`, `SemVer`, `PCA`
+  - Purely English concepts with no natural Russian equivalent keep English name: `One-hot encoding.md`
   - No date prefixes
 
 #### 2.2 Check for Name Conflicts

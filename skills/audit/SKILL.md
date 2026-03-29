@@ -98,6 +98,7 @@ Check:
 - Notes without tags (except type: daily)
 - Singleton tags (1 note, no related hierarchy)
 - Inconsistent casing (`ML` vs `ml`)
+- Non-English tags — all tags must be in English per `references/vault-config.md`
 
 **C. Links:**
 

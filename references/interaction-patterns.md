@@ -47,12 +47,31 @@ After outputting the report, offer to log results to the Daily Note:
 
 If yes:
 
+### Timezone check (first time per conversation)
+
+Before writing the timestamp, detect the system timezone and confirm it with the user:
+
+```bash
+date +"%Z (UTC%:z)"
+```
+
+Show the user:
+
+```
+Системное время: HH:MM (TIMEZONE). Это ваш часовой пояс? (y/n)
+```
+
+- If confirmed — use this timezone for all subsequent daily log entries in this conversation without asking again.
+- If not — ask the user for their timezone offset (e.g. `+10`, `-5`), apply it to all timestamps, and remember for the rest of the conversation.
+
+### Writing the log entry
+
 1. Ensure daily note exists: `obsidian daily`
 2. Get path: `obsidian daily:path`
 3. Try append: `obsidian daily:append content="\n### [Skill name] — HH:MM\n- Обработано: N заметок\n- Изменено: M\n- [краткий список действий]"`
 4. **Fallback:** if append fails silently (file stays empty), write directly via `Read` + `Edit` or `Write` tool using the path from step 2.
 
-Use the current time (HH:MM) and actual counts from the report.
+Use the **user-confirmed local time** (HH:MM) and actual counts from the report.
 
 ## Commit Convention
 
