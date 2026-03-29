@@ -22,7 +22,9 @@
 
 ## File Naming
 
-- Name by concept: `RMSLE metric.md`, `Note title.md`
+- Name by core concept, **in Russian by default**: `Семантическое версионирование (SemVer).md`, `Обработка пропусков.md`
+- English abbreviations and acronyms stay as-is in the name: `Git`, `ML`, `SemVer`, `PCA`, `RMSLE`
+- Purely English concepts that have no natural Russian equivalent keep English name: `One-hot encoding.md`
 - No date prefixes (date in `created` frontmatter field)
 - MOC files keep numeric prefixes: `000 Home.md`
 
@@ -30,6 +32,9 @@
 
 Hierarchical tags with `/`:
 - `topic/subtopic`, `topic/subtopic/detail`
+
+**Tags are always in English** to avoid semantic duplicates across languages (e.g. `ML/metrics` not `МЛ/метрики`). Examples:
+- `ML/metrics`, `dev/versioning`, `finance/bonds`, `physics/optics`
 
 ## Name Conflicts
 

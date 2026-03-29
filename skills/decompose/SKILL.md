@@ -48,7 +48,7 @@ Present in Russian:
 
 Предлагаемые атомарные заметки:
 1. **[Note Title]** — [1-line description] → `notes/[filename].md`
-   Теги: [tag1], [tag2]
+   Теги: [tag1], [tag2] (always in English, per `references/vault-config.md`)
 ...
 
 Секции, остающиеся в MOC:
