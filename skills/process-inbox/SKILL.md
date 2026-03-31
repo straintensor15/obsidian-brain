@@ -5,7 +5,7 @@ description: Process raw notes from Obsidian vault _inbox/ folder — standardiz
 
 # Process Inbox
 
-Process all raw/temporary notes in the vault's `_inbox/` folder.
+Process raw/temporary notes in `_inbox/` with parallel analysis and trust-level-driven apply.
 
 ## Setup
 
@@ -13,6 +13,8 @@ Process all raw/temporary notes in the vault's `_inbox/` folder.
 2. Read `references/frontmatter-spec.md` for frontmatter templates and field rules.
 3. Read `references/cli-operations.md` for CLI commands reference.
 4. Read `references/interaction-patterns.md` for interaction and safety rules.
+5. Read `references/trust-levels.md` for trust level definitions and constraints.
+6. Read `references/temp-file-spec.md` for JSON report format.
 
 ## Process
 
@@ -24,97 +26,138 @@ obsidian files path="_inbox/"
 
 If empty — report «_inbox/ пуст, нечего обрабатывать» and stop.
 
-### 2. For Each File
+Count files. If >40, inform user that first 40 will be processed, rest in next iteration.
 
-#### 2.1 Read and Analyze
+### 2. Phase 1: Parallel Analysis (subagents)
 
-```bash
-obsidian read file="filename"
+Generate timestamp: `ts=$(date +%Y-%m-%dT%H-%M)`
+
+Split inbox files into batches of 10. Dispatch up to 4 subagents with `subagent_type: "vault-worker"`:
+
+> **Scope override:** Process-inbox overrides vault-worker's default excluded areas — `_inbox/` IS the scan target. Subagents also search `notes/`, `literature/`, `projects/` for related notes.
+
+Prompt per batch:
+
+```
+Vault path: {vault_path}
+Task: Analyze inbox notes for processing. Scope override: scan _inbox/ (not default scan area).
+
+For each file in this batch:
+{file_list}
+
+Do the following:
+
+1. Read the file: `obsidian read file="filename"`
+
+2. Determine:
+   - type: note (atomic concept), literature (course/book summary), project (project-related)
+   - tags: hierarchical, ALWAYS in English (ml/metrics, dev/python, finance/bonds)
+   - status: draft (default for new notes)
+   - created: from file content, git history, or today's date
+   - proposed filename: Russian by default (Обработка пропусков.md), English for untranslatable concepts (One-hot encoding.md). No date prefixes.
+
+3. Search for related notes:
+   `obsidian search query="keyword1" limit=10` (use 2-3 key terms from note content)
+
+4. Check name conflicts:
+   `obsidian search query="proposed_filename" limit=5`
+
+5. If you are NOT confident about type or tags (ambiguous content, multiple possible categorizations), set unclear=true with explanation.
+
+Report per file using inbox-specific JSON format (see temp-file-spec.md).
+Category: inbox_analysis
+Confidence: 0.0-1.0 based on how certain you are about type/tags/name.
+
+Write JSON report to: {vault_path}/_temp/inbox-analysis-batch{N}-{ts}.json
 ```
 
-- Determine the topic and appropriate tags (hierarchical, **always in English**: `ML/metrics`, `dev/versioning`, `finance/bonds`)
-- Determine the type: `note` (atomic concept), `literature` (course/book summary), `project` (project-related)
-- If unclear, ask the user
-- Generate filename by core concept, **in Russian by default**: `Обработка пропусков.md`, `Семантическое версионирование (SemVer).md`
-  - English abbreviations/acronyms stay as-is: `Git`, `ML`, `SemVer`, `PCA`
-  - Purely English concepts with no natural Russian equivalent keep English name: `One-hot encoding.md`
-  - No date prefixes
+### 3. Merge Analyses
 
-#### 2.2 Check for Name Conflicts
+After all subagents complete:
 
-```bash
-obsidian search query="filename"
+1. Read all batch JSON files.
+2. Separate files into:
+  - **Clear:** confidence >= 0.7, unclear=false
+  - **Unclear:** unclear=true or confidence < 0.7
+3. Group clear files by proposed type (notes/, literature/, projects/).
+
+### 4. Handle Unclear Files
+
+If any unclear files exist, present them to the user first:
+
+```
+Не удалось уверенно классифицировать:
+
+1. _inbox/some note.md
+   Предположение: type=note, tags=[ml/misc]
+   Причина неуверенности: контент затрагивает несколько тем
+
+   Ваш вариант? (тип / теги / пропустить)
 ```
 
-If a file with this name exists in the target folder, ask the user: merge, rename with suffix, or skip.
+After user resolves unclear files, merge them into clear list.
 
-#### 2.3 Find Related Notes
+### 5. Present Full Plan
 
-```bash
-obsidian search query="keyword1" limit=10
-obsidian search query="keyword2" limit=10
-obsidian backlinks file="filename"
+```
+## План обработки inbox
+
+| # | Файл | → Имя | Папка | Теги | Related |
+|---|------|-------|-------|------|---------|
+| 1 | ML attention.md | Механизм внимания.md | notes/ | ml/transformers | 2 заметки |
+| 2 | ... | ... | ... | ... | ... |
+
+Всего: N файлов (X → notes/, Y → literature/, Z → projects/)
 ```
 
-Use 2-3 key terms from the note content. Collect related note names for wikilinks.
+### 6. Ask Trust Level
 
-#### 2.4 Present Plan
+Per `references/trust-levels.md` (default: `balanced`).
 
-Show the user (in Russian):
-- Proposed filename
-- Target folder (notes/, literature/, projects/)
-- Tags
-- Related notes found (will be linked)
+### 7. Apply
 
-WAIT for user confirmation.
+Per trust level:
 
-#### 2.5 Set Frontmatter
+**cautious:** For each file, show detailed plan and wait for confirmation.
 
-After confirmation, apply frontmatter per `references/frontmatter-spec.md`:
+**balanced:** Group by type:
+
+```
+Группа: notes/ (12 файлов)
+[Применить все 12] [Показать список] [Пропустить]
+
+Группа: literature/ (5 файлов)
+[Применить все 5] [Показать список] [Пропустить]
+```
+
+**auto:** Apply all clear files. Show report.
+
+> Constraint: `obsidian move` requires minimum `balanced`. In `auto` mode, moves still execute but show summary before proceeding.
+
+For each approved file:
 
 ```bash
+# Set frontmatter
 obsidian property:set file="filename" name="type" value="note"
 obsidian property:set file="filename" name="tags" value="topic/subtopic"
 obsidian property:set file="filename" name="status" value="active"
 obsidian property:set file="filename" name="created" value="YYYY-MM-DD"
-```
 
-For `literature` type, also set `source`.
-
-#### 2.6 Enrich Content
-
-Add wikilinks to related concepts in the text body and append See also section:
-
-```bash
+# Add See also
 obsidian append file="filename" content="\n## See also\n- [[Related Note 1]]\n- [[Related Note 2]]"
-```
 
-For inline wikilinks in the body text, use `Read` + `Edit` (CLI append only adds to the end).
+# For inline wikilinks: use Read + Edit
 
-#### 2.7 Move to Target Folder
-
-```bash
+# Move to target folder (LAST — updates wikilinks vault-wide)
 obsidian move file="filename" to="notes/"
 ```
 
-This automatically updates all wikilinks across the vault.
+### 8. Cleanup + Report
 
-### 3. Report + Daily Log + Commit
-
-Follow `references/interaction-patterns.md`:
-- Output summary report
-- Offer daily-log
-- Commit:
-
-```bash
-cd "{vault_path}"
-git add <processed files at new locations> <modified existing notes>
-git commit -m "feat: process inbox notes"
-```
-
-## Multiple Files
-
-Process one at a time: show plan → wait confirmation → process → next file.
+1. Cleanup temp files.
+2. Report per interaction-patterns.
+3. Daily log.
+4. Commit per interaction-patterns convention.
 
 ## Important
 

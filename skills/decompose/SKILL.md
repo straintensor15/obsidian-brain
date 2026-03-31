@@ -13,6 +13,7 @@ Split a large monolithic note into atomic notes and convert the original into a 
 2. Read `references/frontmatter-spec.md` for frontmatter templates and field rules.
 3. Read `references/cli-operations.md` for CLI commands reference.
 4. Read `references/interaction-patterns.md` for interaction and safety rules.
+5. Read `references/trust-levels.md` for trust level definitions and constraints.
 
 ## Input
 
@@ -60,6 +61,24 @@ Present in Russian:
 ### 3. WAIT FOR USER APPROVAL
 
 Do NOT proceed without explicit confirmation.
+
+### 3b. Ask Trust Level
+
+```
+
+Уровень подтверждения:
+
+- **cautious** — подтверждение создания каждой атомарной заметки
+- **balanced** — подтверждение всего плана декомпозиции разом (рекомендуется)
+- **auto** — выполнить весь план без промежуточных подтверждений
+
+[balanced]
+
+```
+
+- `cautious`: confirm each atomic note creation individually
+- `balanced` (default): confirm the full plan, execute all at once
+- `auto`: execute the approved plan without per-note confirmation
 
 ### 4. Execute
 

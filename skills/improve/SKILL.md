@@ -13,6 +13,7 @@ Interactively improve the content of a single Obsidian note. The user picks oper
 2. Read `references/frontmatter-spec.md` for frontmatter templates and field rules.
 3. Read `references/cli-operations.md` for CLI commands reference.
 4. Read `references/interaction-patterns.md` for interaction and safety rules.
+5. Read `references/trust-levels.md` for trust level definitions and constraints.
 
 ## Process
 
@@ -82,6 +83,26 @@ Present the menu to the user (in Russian):
 ```
 
 WAIT for user response.
+
+### 3b. Ask Trust Level
+
+After user selects operations:
+
+```
+
+Уровень подтверждения:
+
+- **cautious** — превью каждой операции, подтверждение каждого изменения (рекомендуется)
+- **balanced** — показать превью, применить рекомендуемый порядок без промежуточных подтверждений
+- **auto** — применить все выбранные операции с дефолтными настройками
+
+[cautious]
+
+```
+
+- `cautious` (default): current v1 behavior — preview + confirm each operation
+- `balanced`: show preview of all changes at once, single confirm, apply in recommended order
+- `auto`: apply all in recommended order, show final diff. Rollback option still available.
 
 ### 4. Check Order and Warn About Conflicts
 
