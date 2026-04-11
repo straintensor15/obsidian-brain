@@ -5,6 +5,18 @@ All notable changes to this project will be documented in this file.
 Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 versioning follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.0-alpha.2] — 2026-04-11
+
+### Added
+- Project memory system: `docs/_INDEX.md` cold-start boot file, `docs/decisions/` (6 initial ADRs), `docs/known-issues.md` catalog
+- `.claude/settings.json` + `.claude/hooks/check-docs-drift.sh` — Stop-hook drift detection between source files and `docs/specs/current.md`
+- Live architectural spec at `docs/specs/current.md` (local, gitignored)
+- Cold-start protocol section in `CLAUDE.md`
+
+### Changed
+- `CLAUDE.md`: header marks file as gitignored, `docs/` navigation rewritten with Git-tracked column, Windows `exit 127` symptom linked to `WIN-001`, skills format note added
+- Legacy dated specs/plans moved to `docs/specs/archive/` and `docs/plans/archive/`
+
 ## [2.0.0-alpha.1] — 2026-03-31
 
 ### Added
